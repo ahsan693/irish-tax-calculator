@@ -5,6 +5,9 @@ const Calculator = () => {
         rentalIncome: 0,
         socialSecurityContributions: 0,
         personalPensionContributions: 0,
+        withholdings: 0,
+        difficultToJustifyExpenses: 0,
+        personalMinimum: 0,
         taxYear: 2026,
         age: 0,
         maritalStatus: 'married',
@@ -17,6 +20,7 @@ const Calculator = () => {
 
     const [expandedSections, setExpandedSections] = React.useState({
         additionalDetails: false,
+        breakdownView: false,
     });
 
     const handleInputChange = (e) => {
@@ -36,10 +40,15 @@ const Calculator = () => {
 
     // Simple tax calculation for 2026
     const calculateTax = () => {
-        const totalIncome = 
-            parseFloat(formData.employmentIncome) + 
-            parseFloat(formData.selfEmployedIncome) + 
-            parseFloat(formData.rentalIncome);
+        const employment = parseFloat(formData.employmentIncome) || 0;
+        const selfEmployed = parseFloat(formData.selfEmployedIncome) || 0;
+        const rental = parseFloat(formData.rentalIncome) || 0;
+        const difficultExpenses = parseFloat(formData.difficultToJustifyExpenses) || 0;
+        const personalMin = parseFloat(formData.personalMinimum) || 5550;
+        const withholdings = parseFloat(formData.withholdings) || 0;
+
+        const totalIncome = employment + selfEmployed + rental;
+        const netIncomeAfterExpenses = totalIncome - difficultExpenses;
 
         // Basic Irish tax rate for 2026
         let incomeTax = 0;
@@ -47,37 +56,54 @@ const Calculator = () => {
         const higherRate = 0.40;
         const standardRateLimit = 48000;
 
-        if (totalIncome > standardRateLimit) {
+        if (netIncomeAfterExpenses > standardRateLimit) {
             incomeTax = (standardRateLimit * standardRate) + 
-                       ((totalIncome - standardRateLimit) * higherRate);
+                       ((netIncomeAfterExpenses - standardRateLimit) * higherRate);
         } else {
-            incomeTax = totalIncome * standardRate;
+            incomeTax = Math.max(0, netIncomeAfterExpenses * standardRate);
         }
 
         // USC (Universal Social Charge)
         let usc = 0;
-        if (totalIncome > 1000) {
-            const uscIncome = totalIncome - 1000;
+        if (netIncomeAfterExpenses > 1000) {
+            const uscIncome = netIncomeAfterExpenses - 1000;
             usc = uscIncome * 0.045;
         }
 
         // PRSI (if employed)
-        let prsi = parseFloat(formData.employmentIncome) * 0.0411;
+        let prsi = employment * 0.0411;
 
-        // Personal Pension Contributions
-        const personalPension = parseFloat(formData.personalPensionContributions);
-
-        // Total deductions
-        const totalTax = incomeTax + usc + prsi;
-        const netIncome = totalIncome - totalTax;
+        // Gross tax before withholdings
+        const grossTax = incomeTax + usc + prsi;
+        
+        // To be refunded/owed
+        const toBeRefunded = withholdings - grossTax;
+        
+        // Net income calculation
+        const totalDeductions = grossTax - toBeRefunded;
+        const actualNetIncome = totalIncome - difficultExpenses - grossTax;
+        
+        // Effective rate
+        const effectiveRate = totalIncome > 0 ? ((grossTax / totalIncome) * 100) : 0;
+        
+        // Monthly net
+        const monthlyNet = actualNetIncome / 12;
 
         return {
-            totalIncome,
+            totalIncome: totalIncome.toFixed(2),
+            netIncome: netIncomeAfterExpenses.toFixed(2),
+            difficultExpenses: difficultExpenses.toFixed(2),
+            personalMinimum: personalMin.toFixed(2),
             incomeTax: incomeTax.toFixed(2),
             usc: usc.toFixed(2),
             prsi: prsi.toFixed(2),
-            totalTax: totalTax.toFixed(2),
-            netIncome: netIncome.toFixed(2),
+            grossTax: grossTax.toFixed(2),
+            withholdings: withholdings.toFixed(2),
+            toBeRefunded: toBeRefunded.toFixed(2),
+            totalTax: grossTax.toFixed(2),
+            effectiveRate: effectiveRate.toFixed(2),
+            monthlyNet: monthlyNet.toFixed(2),
+            actualNetIncome: actualNetIncome.toFixed(2),
         };
     };
 
@@ -146,6 +172,32 @@ const Calculator = () => {
                                 placeholder="0.00"
                             />
                             <span className="currency-symbol">€</span>
+                        </div>
+
+                        <div className="form-group form-group-inline">
+                            <label>Difficult-to-justify Expenses (5%):</label>
+                            <input
+                                type="number"
+                                name="difficultToJustifyExpenses"
+                                value={formData.difficultToJustifyExpenses}
+                                onChange={handleInputChange}
+                                placeholder="0.00"
+                            />
+                            <span className="currency-symbol">€</span>
+                            <small>Expenses that are difficult to justify.</small>
+                        </div>
+
+                        <div className="form-group form-group-inline">
+                            <label>Withholdings Already Paid:</label>
+                            <input
+                                type="number"
+                                name="withholdings"
+                                value={formData.withholdings}
+                                onChange={handleInputChange}
+                                placeholder="0.00"
+                            />
+                            <span className="currency-symbol">€</span>
+                            <small>Total tax withheld during the year.</small>
                         </div>
                     </div>
 
@@ -332,30 +384,77 @@ const Calculator = () => {
                         
                         <div className="results-grid">
                             <div className="result-item">
-                                <div className="result-label">Total Income</div>
-                                <div className="result-value">€{parseFloat(results.totalIncome).toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-                            </div>
-                            <div className="result-item">
-                                <div className="result-label">Income Tax</div>
-                                <div className="result-value">€{parseFloat(results.incomeTax).toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-                            </div>
-                            <div className="result-item">
-                                <div className="result-label">PRSI</div>
-                                <div className="result-value">€{parseFloat(results.prsi).toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-                            </div>
-                            <div className="result-item">
-                                <div className="result-label">USC</div>
-                                <div className="result-value">€{parseFloat(results.usc).toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-                            </div>
-                            <div className="result-item">
-                                <div className="result-label">Total Tax</div>
-                                <div className="result-value">€{parseFloat(results.totalTax).toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-                            </div>
-                            <div className="result-item">
                                 <div className="result-label">Net Income</div>
-                                <div className="result-value" style={{ fontSize: '2rem' }}>€{parseFloat(results.netIncome).toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                                <div className="result-value">€{parseFloat(results.netIncome).toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                            </div>
+                            <div className="result-item">
+                                <div className="result-label">Difficult-to-justify expenses (5%)</div>
+                                <div className="result-value" style={{ color: '#ff6b6b' }}>-€{parseFloat(results.difficultExpenses).toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                            </div>
+                            <div className="result-item">
+                                <div className="result-label">Personal minimum</div>
+                                <div className="result-value">€{parseFloat(results.personalMinimum).toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                            </div>
+                            <div className="result-item">
+                                <div className="result-label">Gross tax</div>
+                                <div className="result-value">€{parseFloat(results.grossTax).toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                            </div>
+                            <div className="result-item">
+                                <div className="result-label">Withholdings already paid</div>
+                                <div className="result-value" style={{ color: '#ff6b6b' }}>-€{parseFloat(results.withholdings).toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                            </div>
+                            <div className="result-item">
+                                <div className="result-label">To be refunded</div>
+                                <div className="result-value" style={{ fontSize: '1.8rem', color: '#51cf66', fontWeight: 'bold' }}>€{parseFloat(results.toBeRefunded).toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                             </div>
                         </div>
+
+                        <div style={{ marginTop: '2rem', padding: '1rem', backgroundColor: 'rgba(255, 255, 255, 0.05)', borderRadius: '8px' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                <div>
+                                    <div style={{ fontSize: '0.85rem', color: '#888' }}>Effective rate</div>
+                                    <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'white' }}>{parseFloat(results.effectiveRate)}%</div>
+                                </div>
+                                <div>
+                                    <div style={{ fontSize: '0.85rem', color: '#888' }}>Monthly net</div>
+                                    <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#51cf66' }}>€{parseFloat(results.monthlyNet).toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {parseFloat(results.toBeRefunded) > 0 && (
+                            <div style={{ marginTop: '1rem', padding: '1rem', backgroundColor: 'rgba(81, 207, 102, 0.2)', borderLeft: '4px solid #51cf66', borderRadius: '4px', color: '#51cf66', fontSize: '0.9rem' }}>
+                                ✓ The withholdings exceed your income tax liability. The difference will be refunded in your tax return.
+                            </div>
+                        )}
+
+                        <div 
+                            className={`collapsible ${expandedSections.breakdownView ? 'active' : ''}`}
+                            onClick={() => toggleSection('breakdownView')}
+                            style={{ marginTop: '1rem' }}
+                        >
+                            <span>▶ View breakdown by brackets</span>
+                            <span>{expandedSections.breakdownView ? '−' : '+'}</span>
+                        </div>
+
+                        {expandedSections.breakdownView && (
+                            <div style={{ marginTop: '1rem' }}>
+                                <div className="results-grid" style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', padding: '1rem', borderRadius: '8px' }}>
+                                    <div className="result-item">
+                                        <div className="result-label">Income Tax</div>
+                                        <div className="result-value">€{parseFloat(results.incomeTax).toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                                    </div>
+                                    <div className="result-item">
+                                        <div className="result-label">PRSI</div>
+                                        <div className="result-value">€{parseFloat(results.prsi).toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                                    </div>
+                                    <div className="result-item">
+                                        <div className="result-label">USC</div>
+                                        <div className="result-value">€{parseFloat(results.usc).toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
 
                         <div className="taxberg-visualization">
                             <div className="taxberg-title">🏔️ The Taxberg</div>
