@@ -2,10 +2,10 @@ const Navbar = ({ onNavigate, currentPage }) => {
     return (
         <nav className="navbar">
             <div className="navbar-logo">
-                <span>📊</span>
+                <span>�</span>
                 <div>
-                    <div>Income Tax</div>
-                    <div style={{ fontSize: '0.8rem', marginTop: '-0.3rem' }}>Calculator</div>
+                    <div>Invoo</div>
+                    <div style={{ fontSize: '0.7rem', marginTop: '-0.3rem', opacity: 0.7 }}>Freelancer Tools</div>
                 </div>
             </div>
             <ul className="navbar-links">
@@ -14,7 +14,7 @@ const Navbar = ({ onNavigate, currentPage }) => {
                         onClick={() => onNavigate('home')}
                         className={currentPage === 'home' ? 'active' : ''}
                     >
-                        Home
+                        Services
                     </a>
                 </li>
                 <li>
@@ -22,7 +22,7 @@ const Navbar = ({ onNavigate, currentPage }) => {
                         onClick={() => onNavigate('calculator')}
                         className={currentPage === 'calculator' ? 'active' : ''}
                     >
-                        Calculator
+                        Calculators
                     </a>
                 </li>
                 <li>
@@ -30,7 +30,7 @@ const Navbar = ({ onNavigate, currentPage }) => {
                         onClick={() => onNavigate('blog')}
                         className={currentPage === 'blog' ? 'active' : ''}
                     >
-                        Blog
+                        Resources
                     </a>
                 </li>
                 <li>
@@ -38,12 +38,12 @@ const Navbar = ({ onNavigate, currentPage }) => {
                         onClick={() => onNavigate('about')}
                         className={currentPage === 'about' ? 'active' : ''}
                     >
-                        About Us
+                        About
                     </a>
                 </li>
             </ul>
             <button className="navbar-cta" onClick={() => onNavigate('calculator')}>
-                Claim Your Free Irish Tax Guide
+                Join the waiting list
             </button>
         </nav>
     );
