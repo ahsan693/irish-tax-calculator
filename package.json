@@ -1,13 +1,12 @@
 {
-  "name": "income-tax-calculator-ireland",
+  "name": "freelancer-net-salary-calculator",
   "version": "1.0.0",
-  "description": "A simple Irish Income Tax Calculator built with React (no build tools needed)",
+  "description": "A freelancer net salary calculator with React (no build tools needed)",
   "keywords": [
-    "ireland",
-    "tax",
+    "freelancer",
     "calculator",
-    "income tax",
-    "react"
+    "net salary",
+    "tax"
   ],
   "author": "Your Name",
   "license": "MIT",

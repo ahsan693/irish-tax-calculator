@@ -11,13 +11,13 @@ const App = () => {
             case 'home':
                 return <Home onNavigate={handleNavigate} />;
             case 'calculator':
-                return <Calculator />;
+                return <FreelancerCalculator />;
             case 'blog':
                 return (
                     <div className="calculator-container" style={{ minHeight: '60vh' }}>
                         <h1 style={{ textAlign: 'center', marginTop: '2rem' }}>Blog</h1>
-                        <p style={{ textAlign: 'center', color: '#666', marginTop: '2rem' }}>
-                            Coming soon! We'll be sharing tips and guides about Irish taxes.
+                        <p style={{ textAlign: 'center', color: '#999', marginTop: '2rem' }}>
+                            Coming soon! We'll be sharing tips and guides about freelancer taxes.
                         </p>
                     </div>
                 );
@@ -25,9 +25,9 @@ const App = () => {
                 return (
                     <div className="calculator-container" style={{ minHeight: '60vh' }}>
                         <h1 style={{ textAlign: 'center', marginTop: '2rem' }}>About Us</h1>
-                        <p style={{ textAlign: 'center', color: '#666', marginTop: '2rem', maxWidth: '600px', marginLeft: 'auto', marginRight: 'auto' }}>
-                            Income Tax Calculator is designed to help individuals quickly and easily estimate their Irish tax liabilities. 
-                            We use current Irish Revenue rates and rules to provide accurate estimates.
+                        <p style={{ textAlign: 'center', color: '#999', marginTop: '2rem', maxWidth: '600px', marginLeft: 'auto', marginRight: 'auto' }}>
+                            Freelancer Net Salary Calculator is designed to help self-employed individuals quickly and easily estimate their real net income after taxes, quotas, and deductions. 
+                            We use current tax rates and rules to provide accurate estimates.
                         </p>
                     </div>
                 );
