@@ -1,0 +1,14 @@
+{
+  "buildCommand": "",
+  "devCommand": "npm start",
+  "outputDirectory": ".",
+  "installCommand": "npm install",
+  "env": {},
+  "public": true,
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}

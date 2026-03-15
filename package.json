@@ -1,0 +1,21 @@
+{
+  "name": "income-tax-calculator-ireland",
+  "version": "1.0.0",
+  "description": "A simple Irish Income Tax Calculator built with React (no build tools needed)",
+  "keywords": [
+    "ireland",
+    "tax",
+    "calculator",
+    "income tax",
+    "react"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "scripts": {
+    "start": "http-server -p 8000 -c-1",
+    "dev": "http-server -p 8000"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}
